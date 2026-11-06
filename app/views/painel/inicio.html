@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block titulo %}Agenda do dia{% endblock %}
+{% block conteudo %}
+<header class="topo-agenda">
+  <div>
+    <h1>{{ dia.strftime('%d/%m/%Y') }}{% if dia == hoje %} <span class="hoje">hoje</span>{% endif %}</h1>
+    <p class="resumo">{{ resumo.agendados }} em aberto, {{ resumo.concluidos }} concluídos, {{ resumo.cancelados }} cancelados. Faturado: {{ resumo.faturamento|preco or 'R$ 0,00' }}.</p>
+  </div>
+  <form class="navegacao-dia" method="get" action="{{ url_for('painel.inicio') }}" data-enviar-ao-mudar>
+    <a class="botao-secundario" href="{{ url_for('painel.inicio', data=anterior.isoformat()) }}" aria-label="Dia anterior">Anterior</a>
+    <label class="visualmente-oculto" for="data">Escolher dia</label>
+    <input id="data" name="data" type="date" value="{{ dia.isoformat() }}">
+    <a class="botao-secundario" href="{{ url_for('painel.inicio', data=seguinte.isoformat()) }}" aria-label="Próximo dia">Próximo</a>
+    {% if dia != hoje %}<a class="botao-texto" href="{{ url_for('painel.inicio') }}">Ir para hoje</a>{% endif %}
+  </form>
+</header>
+
+{% if not colunas %}
+<section class="vazio">
+  <h2>Nenhum barbeiro ativo</h2>
+  <p>Cadastre um barbeiro para começar a montar a agenda.</p>
+  <a class="botao" href="{{ url_for('barbeiros.novo') }}">Cadastrar barbeiro</a>
+</section>
+{% else %}
+<div class="quadro">
+  {% for coluna in colunas %}
+  <section class="coluna" aria-labelledby="barbeiro-{{ coluna.barbeiro.id }}">
+    <header class="coluna-topo">
+      <h2 id="barbeiro-{{ coluna.barbeiro.id }}">{{ coluna.barbeiro.nome }}</h2>
+      <a class="botao-texto" href="{{ url_for('agendamentos.novo', data=dia.isoformat(), barbeiro_id=coluna.barbeiro.id) }}">Agendar</a>
+    </header>
+    {% if coluna.itens %}
+    <ol class="horarios">
+      {% for item in coluna.itens %}
+      <li class="horario horario-{{ item.status|lower }}">
+        <p class="hora">{{ item.inicio|hora }}<span> até {{ item.fim|hora }}</span></p>
+        <p class="cliente">{{ item.cliente_nome }}</p>
+        <p class="detalhe">{{ item.servico_nome }}, {{ item.preco_centavos|preco }}</p>
+        {% if item.status == 'AGENDADO' %}
+        <div class="acoes">
+          <form method="post" action="{{ url_for('agendamentos.status', agendamento_id=item.id) }}">
+            <input type="hidden" name="status" value="CONCLUIDO">
+            <input type="hidden" name="voltar" value="{{ request.full_path }}">
+            <button type="submit" class="botao-pequeno">Concluir</button>
+          </form>
+          <a class="botao-pequeno botao-pequeno-neutro" href="{{ url_for('agendamentos.editar', agendamento_id=item.id) }}">Remarcar</a>
+          <form method="post" action="{{ url_for('agendamentos.status', agendamento_id=item.id) }}" data-confirmar="Cancelar o atendimento de {{ item.cliente_nome }} às {{ item.inicio|hora }}?">
+            <input type="hidden" name="status" value="CANCELADO">
+            <input type="hidden" name="voltar" value="{{ request.full_path }}">
+            <button type="submit" class="botao-pequeno botao-pequeno-perigo">Cancelar</button>
+          </form>
+        </div>
+        {% else %}
+        <p class="selo">{{ item.status|status }}</p>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="coluna-vazia">Sem atendimentos neste dia.</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

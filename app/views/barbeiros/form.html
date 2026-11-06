@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, erro_geral %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina"><h1>{{ titulo }}</h1></header>
+{{ erro_geral(erros) }}
+<form class="formulario" method="post" action="{{ url_for('barbeiros.editar', barbeiro_id=barbeiro_id) if barbeiro_id else url_for('barbeiros.novo') }}" novalidate>
+  {{ campo("nome", "Nome", dados, erros, obrigatorio=true, atributos='maxlength="80"') }}
+  {{ campo("telefone", "Telefone com DDD", dados, erros, tipo="tel", atributos='data-telefone inputmode="numeric" placeholder="(85) 99999-0000"') }}
+  <div class="campo campo-marcacao">
+    <input id="ativo" name="ativo" type="checkbox" value="1"{% if dados.get('ativo') %} checked{% endif %}>
+    <label for="ativo">Disponível para agendamentos</label>
+  </div>
+  <div class="botoes">
+    <button type="submit" class="botao">Salvar barbeiro</button>
+    <a class="botao-texto" href="{{ url_for('barbeiros.lista') }}">Voltar</a>
+  </div>
+</form>
+{% endblock %}

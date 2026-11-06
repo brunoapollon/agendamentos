@@ -1,0 +1,7 @@
+{
+  "name": "agendacorte-front",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/front/app.test.js"
+  }
+}

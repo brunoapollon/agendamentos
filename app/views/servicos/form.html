@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, erro_geral %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina"><h1>{{ titulo }}</h1></header>
+{{ erro_geral(erros) }}
+<form class="formulario" method="post" action="{{ url_for('servicos.editar', servico_id=servico_id) if servico_id else url_for('servicos.novo') }}" novalidate>
+  {{ campo("nome", "Nome do serviço", dados, erros, obrigatorio=true, atributos='maxlength="60"') }}
+  <div class="campos-lado">
+    {{ campo("preco", "Preço (R$)", dados, erros, obrigatorio=true, atributos='inputmode="decimal" placeholder="35,00"') }}
+    {{ campo("duracao_min", "Duração (minutos)", dados, erros, tipo="number", obrigatorio=true, atributos='min="5" max="240" step="5"') }}
+  </div>
+  <div class="campo campo-marcacao">
+    <input id="ativo" name="ativo" type="checkbox" value="1"{% if dados.get('ativo') %} checked{% endif %}>
+    <label for="ativo">Disponível para agendamentos</label>
+  </div>
+  <div class="botoes">
+    <button type="submit" class="botao">Salvar serviço</button>
+    <a class="botao-texto" href="{{ url_for('servicos.lista') }}">Voltar</a>
+  </div>
+</form>
+{% endblock %}

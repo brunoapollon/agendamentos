@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Agendamentos{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina">
+  <h1>Agendamentos</h1>
+  <a class="botao" href="{{ url_for('agendamentos.novo') }}">Novo agendamento</a>
+</header>
+<form class="filtros" method="get" action="{{ url_for('agendamentos.lista') }}">
+  <div class="campo">
+    <label for="data">Dia</label>
+    <input id="data" name="data" type="date" value="{{ filtro.data }}">
+  </div>
+  <div class="campo">
+    <label for="barbeiro_id">Barbeiro</label>
+    <select id="barbeiro_id" name="barbeiro_id">
+      <option value="">Todos</option>
+      {% for b in barbeiros %}<option value="{{ b.id }}"{% if filtro.barbeiro_id == b.id %} selected{% endif %}>{{ b.nome }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="campo">
+    <label for="status">Situação</label>
+    <select id="status" name="status">
+      <option value="">Todas</option>
+      {% for valor, rotulo in rotulos.items() %}<option value="{{ valor }}"{% if filtro.status == valor %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="botao-secundario">Filtrar</button>
+  <a class="botao-texto" href="{{ url_for('agendamentos.lista') }}">Limpar</a>
+</form>
+{% if not filtro.data %}<p class="dica">Sem dia escolhido, a lista mostra os agendamentos de hoje em diante.</p>{% endif %}
+{% if itens %}
+<div class="tabela-rolagem">
+  <table>
+    <thead><tr><th scope="col">Dia</th><th scope="col">Horário</th><th scope="col">Cliente</th><th scope="col">Barbeiro</th><th scope="col">Serviço</th><th scope="col" class="numero">Valor</th><th scope="col">Situação</th><th scope="col"><span class="visualmente-oculto">Ações</span></th></tr></thead>
+    <tbody>
+      {% for a in itens %}
+      <tr class="linha-{{ a.status|lower }}">
+        <td class="numero">{{ a.inicio[8:10] }}/{{ a.inicio[5:7] }}</td>
+        <td class="numero">{{ a.inicio|hora }} até {{ a.fim|hora }}</td>
+        <td>{{ a.cliente_nome }}</td>
+        <td>{{ a.barbeiro_nome }}</td>
+        <td>{{ a.servico_nome }}</td>
+        <td class="numero">{{ a.preco_centavos|preco }}</td>
+        <td>{{ a.status|status }}</td>
+        <td class="acoes-linha">{% if a.status == 'AGENDADO' %}<a href="{{ url_for('agendamentos.editar', agendamento_id=a.id) }}">Remarcar</a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="vazio-texto">Nenhum agendamento encontrado com esses filtros.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Clientes{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina">
+  <h1>Clientes</h1>
+  <a class="botao" href="{{ url_for('clientes.novo') }}">Cadastrar cliente</a>
+</header>
+<form class="filtros" method="get" action="{{ url_for('clientes.lista') }}" role="search">
+  <div class="campo">
+    <label for="busca">Buscar por nome ou telefone</label>
+    <input id="busca" name="busca" type="search" value="{{ busca }}">
+  </div>
+  <button type="submit" class="botao-secundario">Buscar</button>
+</form>
+{% if clientes %}
+<div class="tabela-rolagem">
+  <table>
+    <thead><tr><th scope="col">Nome</th><th scope="col">Telefone</th><th scope="col">E-mail</th><th scope="col"><span class="visualmente-oculto">Ações</span></th></tr></thead>
+    <tbody>
+      {% for c in clientes %}
+      <tr>
+        <td>{{ c.nome }}</td>
+        <td class="numero">{{ c.telefone|telefone }}</td>
+        <td>{{ c.email or '' }}</td>
+        <td class="acoes-linha">
+          <a href="{{ url_for('agendamentos.novo', cliente_id=c.id) }}">Agendar</a>
+          <a href="{{ url_for('clientes.editar', cliente_id=c.id) }}">Editar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif busca %}
+<p class="vazio-texto">Nenhum cliente encontrado para "{{ busca }}".</p>
+{% else %}
+<section class="vazio">
+  <h2>Nenhum cliente cadastrado</h2>
+  <a class="botao" href="{{ url_for('clientes.novo') }}">Cadastrar o primeiro cliente</a>
+</section>
+{% endif %}
+{% endblock %}

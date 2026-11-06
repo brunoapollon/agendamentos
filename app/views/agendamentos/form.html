@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, abrir_selecao, fechar_selecao, marcado, erro_geral %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina"><h1>{{ titulo }}</h1></header>
+{{ erro_geral(erros) }}
+{% if not clientes or not barbeiros or not servicos %}
+<section class="vazio">
+  <h2>Faltam cadastros para agendar</h2>
+  <p>É preciso ter ao menos um cliente, um barbeiro disponível e um serviço disponível.</p>
+  <div class="botoes">
+    {% if not clientes %}<a class="botao-secundario" href="{{ url_for('clientes.novo') }}">Cadastrar cliente</a>{% endif %}
+    {% if not barbeiros %}<a class="botao-secundario" href="{{ url_for('barbeiros.novo') }}">Cadastrar barbeiro</a>{% endif %}
+    {% if not servicos %}<a class="botao-secundario" href="{{ url_for('servicos.novo') }}">Cadastrar serviço</a>{% endif %}
+  </div>
+</section>
+{% else %}
+<form class="formulario" method="post" action="{{ url_for('agendamentos.editar', agendamento_id=agendamento_id) if agendamento_id else url_for('agendamentos.novo') }}" novalidate>
+  <div class="campo{% if erros.get('cliente_id') %} campo-com-erro{% endif %}">
+    {{ abrir_selecao("cliente_id", "Cliente", erros, "Selecione o cliente") }}
+    {% for c in clientes %}<option value="{{ c.id }}"{{ marcado(dados, 'cliente_id', c.id) }}>{{ c.nome }}, {{ c.telefone|telefone }}</option>{% endfor %}
+    {{ fechar_selecao("cliente_id", erros) }}
+  </div>
+  <div class="campo{% if erros.get('barbeiro_id') %} campo-com-erro{% endif %}">
+    {{ abrir_selecao("barbeiro_id", "Barbeiro", erros, "Selecione o barbeiro") }}
+    {% for b in barbeiros %}<option value="{{ b.id }}"{{ marcado(dados, 'barbeiro_id', b.id) }}>{{ b.nome }}</option>{% endfor %}
+    {{ fechar_selecao("barbeiro_id", erros) }}
+  </div>
+  <div class="campo{% if erros.get('servico_id') %} campo-com-erro{% endif %}">
+    {{ abrir_selecao("servico_id", "Serviço", erros, "Selecione o serviço") }}
+    {% for s in servicos %}<option value="{{ s.id }}" data-duracao="{{ s.duracao_min }}" data-preco="{{ s.preco_centavos }}"{{ marcado(dados, 'servico_id', s.id) }}>{{ s.nome }}, {{ s.duracao_min }} min, {{ s.preco_centavos|preco }}</option>{% endfor %}
+    {{ fechar_selecao("servico_id", erros) }}
+  </div>
+  <div class="campos-lado">
+    {{ campo("data", "Data", dados, erros, tipo="date", obrigatorio=true) }}
+    {{ campo("hora", "Horário de início", dados, erros, tipo="time", obrigatorio=true, atributos='step="300"') }}
+  </div>
+  {% if erros.get('inicio') %}<p class="erro-campo erro-horario" role="alert">{{ erros['inicio'] }}</p>{% endif %}
+  <p class="previsao" data-previsao aria-live="polite"></p>
+  <div class="botoes">
+    <button type="submit" class="botao">{{ 'Salvar remarcação' if agendamento_id else 'Agendar' }}</button>
+    <a class="botao-texto" href="{{ url_for('painel.inicio', data=dados.get('data')) }}">Voltar</a>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

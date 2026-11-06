@@ -1,0 +1,25 @@
+{% macro campo(nome, rotulo, dados, erros, tipo="text", obrigatorio=false, atributos="") %}
+<div class="campo{% if erros.get(nome) %} campo-com-erro{% endif %}">
+  <label for="{{ nome }}">{{ rotulo }}{% if not obrigatorio %} <span class="opcional">opcional</span>{% endif %}</label>
+  <input id="{{ nome }}" name="{{ nome }}" type="{{ tipo }}" value="{{ dados.get(nome) if dados.get(nome) is not none else '' }}"{% if obrigatorio %} required{% endif %} {{ atributos|safe }}{% if erros.get(nome) %} aria-invalid="true" aria-describedby="{{ nome }}-erro"{% endif %}>
+  {% if erros.get(nome) %}<p class="erro-campo" id="{{ nome }}-erro">{{ erros[nome] }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro abrir_selecao(nome, rotulo, erros, vazio) %}
+<label for="{{ nome }}">{{ rotulo }}</label>
+<select id="{{ nome }}" name="{{ nome }}" required{% if erros.get(nome) %} aria-invalid="true" aria-describedby="{{ nome }}-erro"{% endif %}>
+  <option value="">{{ vazio }}</option>
+{% endmacro %}
+
+{% macro fechar_selecao(nome, erros) %}
+</select>
+{% if erros.get(nome) %}<p class="erro-campo" id="{{ nome }}-erro">{{ erros[nome] }}</p>{% endif %}
+{% endmacro %}
+
+{% macro marcado(dados, nome, valor) %}{% if dados.get(nome)|string == valor|string %} selected{% endif %}{% endmacro %}
+
+{% macro erro_geral(erros) %}
+{% if erros.get("geral") %}<p class="mensagem mensagem-erro" role="alert">{{ erros["geral"] }}</p>
+{% elif erros %}<p class="mensagem mensagem-erro" role="alert">Corrija os campos destacados para continuar.</p>{% endif %}
+{% endmacro %}

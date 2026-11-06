@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}{% endblock %} | AgendaCorte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+</head>
+<body>
+  <div class="{{ 'estrutura' if g.usuario else 'estrutura-publica' }}">
+    {% if g.usuario %}
+    <aside class="lateral">
+      <a class="marca" href="{{ url_for('painel.inicio') }}">AgendaCorte</a>
+      <nav class="menu" aria-label="Principal">
+        {% set atual = request.blueprint %}
+        <a href="{{ url_for('painel.inicio') }}" {% if atual == 'painel' %}aria-current="page"{% endif %}>Agenda do dia</a>
+        <a href="{{ url_for('agendamentos.lista') }}" {% if atual == 'agendamentos' %}aria-current="page"{% endif %}>Agendamentos</a>
+        <a href="{{ url_for('clientes.lista') }}" {% if atual == 'clientes' %}aria-current="page"{% endif %}>Clientes</a>
+        <a href="{{ url_for('barbeiros.lista') }}" {% if atual == 'barbeiros' %}aria-current="page"{% endif %}>Barbeiros</a>
+        <a href="{{ url_for('servicos.lista') }}" {% if atual == 'servicos' %}aria-current="page"{% endif %}>Serviços</a>
+      </nav>
+      <form class="sessao" method="post" action="{{ url_for('auth.logout') }}">
+        <span>{{ g.usuario.nome }}</span>
+        <button type="submit" class="botao-texto">Sair</button>
+      </form>
+    </aside>
+    {% endif %}
+    <main class="conteudo">
+      {% include "_mensagens.html" %}
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

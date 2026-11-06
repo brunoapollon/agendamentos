@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import campo, erro_geral %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<header class="topo-pagina"><h1>{{ titulo }}</h1></header>
+{{ erro_geral(erros) }}
+<form class="formulario" method="post" action="{{ url_for('clientes.editar', cliente_id=cliente_id) if cliente_id else url_for('clientes.novo') }}" novalidate>
+  {{ campo("nome", "Nome", dados, erros, obrigatorio=true, atributos='maxlength="80" autocomplete="name"') }}
+  {{ campo("telefone", "Telefone com DDD", dados, erros, tipo="tel", obrigatorio=true, atributos='data-telefone inputmode="numeric" placeholder="(85) 99999-0000"') }}
+  {{ campo("email", "E-mail", dados, erros, tipo="email", atributos='maxlength="120"') }}
+  <div class="campo{% if erros.get('observacao') %} campo-com-erro{% endif %}">
+    <label for="observacao">Observações <span class="opcional">opcional</span></label>
+    <textarea id="observacao" name="observacao" rows="3" maxlength="300">{{ dados.get('observacao') or '' }}</textarea>
+    {% if erros.get('observacao') %}<p class="erro-campo">{{ erros['observacao'] }}</p>{% endif %}
+  </div>
+  <div class="botoes">
+    <button type="submit" class="botao">Salvar cliente</button>
+    <a class="botao-texto" href="{{ url_for('clientes.lista') }}">Voltar</a>
+  </div>
+</form>
+{% if cliente_id %}
+<form class="zona-exclusao" method="post" action="{{ url_for('clientes.excluir', cliente_id=cliente_id) }}" data-confirmar="Excluir este cliente? Essa ação não pode ser desfeita.">
+  <button type="submit" class="botao-perigo">Excluir cliente</button>
+</form>
+{% endif %}
+{% endblock %}
